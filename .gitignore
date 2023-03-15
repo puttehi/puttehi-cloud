@@ -1,0 +1,6 @@
+SECRET
+**/.terraform
+**/SECRET
+**/.pluralith
+**/Pluralith_Diagram.pdf
+**/terraform.tfstate
