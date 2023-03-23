@@ -1,0 +1,26 @@
+---
+- name: Make initial users
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    password: "{{ item.value.password }}"
+    state: present
+    shell: "{{ item.value.shell }}"
+  loop: "{{ init.users | dict2items }}"
+
+- name: Assign initial users to groups
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    state: present
+    groups: "{{ item.key }},{{ item.value.groups }}" # Declarative
+  loop: "{{ init.users | dict2items }}"
+
+- name: Set authorized_keys for initial users
+  include_tasks: authorized_key.yml
+  loop: "{{ init.users | dict2items }}"
+  loop_control:
+    loop_var: outer_item
+
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ init.hostname }}"
+

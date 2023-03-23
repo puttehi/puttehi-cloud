@@ -1,0 +1,6 @@
+# Deploy personal VPS Nanode
+---
+- name: Configure personal VPS
+  hosts: all
+  roles:
+    - role: "puttehi_vps"

@@ -7,7 +7,7 @@ help:
 	@echo "Try make vps to deploy VPS"
 
 vps: setup
-	$(VENV) ansible-playbook -i inventory/personal play-vps.yml
+	$(VENV) ansible-playbook -i inventory/personal.yml play-vps.yml
 
 setup: venv
 	$(VENV) pip install wheel

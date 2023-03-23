@@ -1,0 +1,5 @@
+all:
+  children:
+    personal:
+      hosts:
+        vps.puttehi.eu:

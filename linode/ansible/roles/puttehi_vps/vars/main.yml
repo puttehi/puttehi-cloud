@@ -1,0 +1,16 @@
+---
+# base.yml
+init:
+  users:
+    puttehi:
+      groups: "sudo"
+      public_keys:
+        - "~/.ssh/linode-vps-puttehi.pub"
+      shell: "/usr/bin/bash"
+      password: "*"
+  hostname: debi
+
+# podman.yml
+podman:
+  users:
+    - nginx-hello

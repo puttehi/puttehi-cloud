@@ -1,0 +1,6 @@
+- name: "Set authorized_key"
+  ansible.posix.authorized_key:
+    user: "{{ outer_item.key }}"
+    key: "{{ item }}"
+  with_file: "{{ outer_item.value.public_keys | list }}"
+
