@@ -4,3 +4,6 @@ SECRET
 **/.pluralith
 **/Pluralith_Diagram.pdf
 **/terraform.tfstate
+**/linode-vps-root
+**/secrets
+**/*.tfstate*
