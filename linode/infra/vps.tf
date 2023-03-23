@@ -4,13 +4,92 @@ terraform {
       source = "linode/linode"
       # no version lock
     }
+    /* godaddy = {
+      source = "n3integration/godaddy"
+    } */
   }
   required_version = "~>1.4.0"
 }
 
-# Configure the Linode Provider
+/* # Configure the Linode Provider
 provider "linode" {
   # token is read from LINODE_TOKEN env var
+} */
+
+/* provider "godaddy" {
+  # token is read from GODADDY_API_KEY, GODADY_API_SECRET env vars or asked if not given
+
+} */
+
+/* resource "godaddy_domain_record" "puttehi_eu" {
+  // must exist (buy) -> terraform import
+  domain = "puttehi.eu"
+
+  // required if provider key does not belong to customer
+  # customer = "1234"
+
+  record {
+    data     = "@"
+    name     = "www"
+    port     = 0
+    priority = 0
+    ttl      = 3600
+    type     = "CNAME"
+    weight   = 0
+  }
+  record {
+    data     = "Parked"
+    name     = "@"
+    port     = 0
+    priority = 0
+    ttl      = 600
+    type     = "A"
+    weight   = 0
+  }
+  record {
+    data     = "_domainconnect.gd.domaincontrol.com"
+    name     = "_domainconnect"
+    port     = 0
+    priority = 0
+    ttl      = 3600
+    type     = "CNAME"
+    weight   = 0
+  }
+
+  // specify any A records associated with the domain
+  //addresses = ["192.168.1.2", "192.168.1.3"]
+
+  // specify any custom nameservers for your domain
+  // note: godaddy now requires that the 'custom' nameservers are first supplied through the ui
+  nameservers = [
+    "ns33.domaincontrol.com",
+    "ns34.domaincontrol.com",
+    "ns1.linode.com",
+    "ns2.linode.com",
+    "ns3.linode.com",
+    "ns4.linode.com",
+    "ns5.linode.com"
+  ]
+} */
+
+resource "linode_domain" "puttehi_eu" {
+  type      = "master"
+  domain    = "puttehi.eu"
+  soa_email = "zittingpetteri@gmail.com"
+}
+
+resource "linode_domain_record" "www" {
+  domain_id   = linode_domain.puttehi_eu.id
+  name        = "www"
+  record_type = "CNAME"
+  target      = "puttehi.eu"
+}
+
+resource "linode_domain_record" "vps" {
+  domain_id   = linode_domain.puttehi_eu.id
+  name        = "vps"
+  record_type = "A"
+  target      = linode_instance.vps.ip_address
 }
 
 # Create a Linode
