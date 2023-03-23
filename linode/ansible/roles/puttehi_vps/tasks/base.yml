@@ -7,12 +7,26 @@
     shell: "{{ item.value.shell }}"
   loop: "{{ init.users | dict2items }}"
 
+- name: Remove root password login
+  ansible.builtin.user:
+    user: "root"
+    password: "*"
+
 - name: Assign initial users to groups
   ansible.builtin.user:
     name: "{{ item.key }}"
     state: present
     groups: "{{ item.key }},{{ item.value.groups }}" # Declarative
   loop: "{{ init.users | dict2items }}"
+
+- name: Make desired initial users sudoers
+  community.general.sudoers:
+    name: "{{ item.key }}"
+    user: "{{ item.key }}"
+    commands: ALL
+    state: present
+  loop: "{{ init.users | dict2items }}"
+  when: "{{ (item.value.sudoer | bool) == true }}"
 
 - name: Set authorized_keys for initial users
   include_tasks: authorized_key.yml
@@ -23,4 +37,15 @@
 - name: Set hostname
   ansible.builtin.hostname:
     name: "{{ init.hostname }}"
+
+- name: Set /etc/hosts
+  ansible.builtin.lineinfile:
+      line: "127.0.0.1\t{{ init.hostname }}"
+      path: "/etc/hosts"
+
+- name: Update package manager cache
+  include_tasks: package_update.yml
+
+- name: Upgrade installed packages
+  include_tasks: package_upgrade.yml
 
