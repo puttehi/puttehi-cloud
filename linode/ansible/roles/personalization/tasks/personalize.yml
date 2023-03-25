@@ -20,6 +20,10 @@
       - tree
       - zoxide
       - lolcat
+      - gcc
+      - clang
+      - golang
+      - python3-venv
     state: latest
 
 - name: "Copy SSH Keys: Ensure /home/{{ personalization_user }}/.ssh permissions"

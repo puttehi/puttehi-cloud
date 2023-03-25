@@ -8,10 +8,15 @@
         name: "personalization"
       vars:
         ansible_ssh_user: "puttehi"
-        personalization_ssh_keys_public: ["~/.ssh/github-debi.pub"]
-        personalization_ssh_keys_private: [ "~/.ssh/github-debi" ]
+        personalization_ssh_keys_public:
+          - "~/.ssh/github-debi.pub"
+          - "~/.ssh/github-debi-nvim.pub"
+        personalization_ssh_keys_private:
+          - "~/.ssh/github-debi"
+          - "~/.ssh/github-debi-nvim"
         personalization_user: "puttehi"
         personalization_omp_version: "v8.17.0"
         personalization_omp_theme: "~/.poshthemes/putte.omp.json" # needs v8.17.0
         personalization_hostname: "debi"
         personalization_dotfiles_repo_deploy_key_path: "/home/puttehi/.ssh/github-debi"
+        personalization_install_nvim: true

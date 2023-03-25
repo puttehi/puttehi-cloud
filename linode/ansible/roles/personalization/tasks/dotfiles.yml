@@ -58,6 +58,10 @@
         dest: /home/{{ personalization_user }}/.bashrc
         state: link
         force: true # Overwrite existing file with link
+    - name: "Dotfiles/.bashrc: Append workaround batcat being batcat instead of bat"
+      ansible.builtin.lineinfile:
+        path: /home/{{ personalization_user }}/.bashrc
+        line: 'alias bat="batcat"'
 
 # Requires vim, Vundle
 - name: "Dotfiles/.vim/colors/puttehi-dark.vim"

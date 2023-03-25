@@ -14,3 +14,9 @@
   when:
     - personalization_user is defined
     - personalization_dotfiles_repo_deploy_key_path is defined
+
+- name: "NeoVim"
+  include_tasks: nvim.yml
+  when:
+    - personalization_user is defined
+    - personalization_install_nvim is defined and personalization_install_nvim | bool

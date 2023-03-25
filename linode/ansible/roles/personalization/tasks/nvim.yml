@@ -1,0 +1,76 @@
+---
+- name: "NeoVim: Make temp dir"
+  ansible.builtin.file:
+    path: "/home/{{ personalization_user }}/tmp/nvim"
+    state: directory
+    mode: u=rwx,g=rx,o=rx
+    owner: "{{ personalization_user }}"
+    group: "{{ personalization_user }}"
+
+- name: "NeoVim: Download"
+  become: true
+  remote_user: "root"
+  become_user: "root"
+  ansible.builtin.get_url:
+    url: "https://github.com/neovim/neovim/releases/download/v0.8.1/nvim-linux64.deb"
+    dest: "/home/{{ personalization_user }}/tmp/nvim/nvim-linux64.deb"
+    mode: u=rwx,g=rx,o=rx
+    owner: root
+    group: root
+    force: true
+
+- name: Install a .deb package
+  become: true
+  ansible.builtin.apt:
+    deb: "/home/{{ personalization_user }}/tmp/nvim/nvim-linux64.deb"
+
+- name: "NeoVim: Remove temp dir"
+  become: true
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ personalization_user }}/tmp/nvim"
+    state: absent
+    force: true
+
+- name: "NeoVim: Install Packer"
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  block:
+    - name: "Packer: Ensure dir exists"
+      ansible.builtin.file:
+        path: "/home/{{ personalization_user }}/.local/share/nvim/site/pack/packer/start"
+        state: directory
+        mode: u=rwx,g=rwx,o=rx
+        owner: "{{ personalization_user }}"
+        group: "{{ personalization_user }}"
+    - name: "Packer: Clone"
+      ansible.builtin.git:
+        repo: "https://github.com/wbthomason/packer.nvim"
+        dest: "/home/{{ personalization_user }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+        update: true
+        clone: true
+        remote: origin
+
+- name: "NeoVim: Config and plugins"
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  block:
+    - name: "Config: Ensure ~/.config exists"
+      ansible.builtin.file:
+        path: "/home/{{ personalization_user }}/.config"
+        state: directory
+        mode: u=rwx,g=,o=
+        owner: "{{ personalization_user }}"
+        group: "{{ personalization_user }}"
+    - name: "Config: Clone to ~/.config/nvim"
+      ansible.builtin.git:
+        repo: "git@github.com:puttehi/nvim-lua"
+        dest: "/home/{{ personalization_user }}/.config/nvim"
+        update: true
+        clone: true
+        remote: origin
+        key_file: "/home/{{ personalization_user }}/.ssh/github-debi-nvim"
+    - name: "Config: Run Packer"
+      ansible.builtin.command: "nvim --headless /home/{{ personalization_user }}/.config/nvim/lua/puttehi/packer.lua -c 'autocmd User PackerComplete quitall' -c 'PackerSync'"
+
