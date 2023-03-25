@@ -4,10 +4,13 @@ VENV:=source venv/bin/activate &&
 
 PHONY:=help
 help:
-	@echo "Try make vps to deploy VPS"
+	@echo "Try make play args=\"-i myinventory --limit myhost play-myplay.yml\" to run Ansible"
 
-vps: setup
-	$(VENV) ansible-playbook -i inventory/personal.yml play-vps.yml
+play: setup
+	$(VENV) ansible-playbook $(args)
+
+vps.puttehi.eu:
+	$(VENV) ansible-playbook -i inventory/personal.yml --limit vps.puttehi.eu $(args)
 
 setup: venv
 	$(VENV) pip install wheel

@@ -1,0 +1,16 @@
+---
+- name: "Personalize"
+  include_tasks: personalize.yml
+  when:
+    - personalization_user is defined
+    - personalization_ssh_keys_public is defined
+    - personalization_ssh_keys_private is defined
+    - personalization_omp_version is defined
+    - personalization_omp_theme is defined
+    - personalization_hostname is defined
+
+- name: "Dotfiles"
+  include_tasks: dotfiles.yml
+  when:
+    - personalization_user is defined
+    - personalization_dotfiles_repo_deploy_key_path is defined

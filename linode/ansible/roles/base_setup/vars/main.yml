@@ -1,0 +1,9 @@
+---
+#base_users: # Base users to set up
+#  my_username: # Username
+#    sudoer: true # Add to sudoers?
+#    groups: "" # Extra groups? Syntax: groupA,groupB,groupC
+#    public_keys: # Authorized login keys
+#      - "~/.ssh/my-login-key.pub"
+#    shell: "/usr/bin/desired-shell" # What login shell?
+#    password: "*" # User PW. "*": Disable PW login

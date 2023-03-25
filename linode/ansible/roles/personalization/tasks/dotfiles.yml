@@ -1,0 +1,92 @@
+- name: "Install dotfiles repo: Trust github.com keys in known_hosts"
+  become: false
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  ansible.builtin.known_hosts:
+    name: github.com
+    key: "{{ item }}"
+    path: "/home/{{ personalization_user }}/.ssh/known_hosts"
+    state: present
+  loop:
+    - "github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
+    - "github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk="
+    - "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+- name: "Install dotfiles repo: Trust github.com IP keys in known_hosts"
+  become: false
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  ansible.builtin.known_hosts:
+    name: 140.82.121.4
+    key: "{{ item }}"
+    path: "/home/{{ personalization_user }}/.ssh/known_hosts"
+    state: present
+  loop:
+    - "140.82.121.4 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
+    - "140.82.121.4 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk="
+    - "140.82.121.4 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+- name: "Install dotfiles repo: Clone dotfiles repo with and checkout bare branch"
+  become: false
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  ansible.builtin.git:
+    repo: git@github.com:puttehi/dotfiles.git
+    dest: "/home/{{ personalization_user }}/dotfiles"
+    remote: "origin"
+    version: "bare" # Branch name
+    update: true
+    key_file: "{{ personalization_dotfiles_repo_deploy_key_path }}"
+    force: true # Discard remote changes
+
+# Requires rg, fd, tldr, bat, tree, nvm, oh-my-posh, ...
+- name: "Dotfiles/.bashrc"
+  become: false
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  block:
+    - name: "Dotfiles/.bashrc: Copy greeting files"
+      ansible.builtin.file:
+        src: "/home/{{ personalization_user }}/dotfiles/{{ item }}"
+        dest: "/home/{{ personalization_user }}/{{ item }}"
+        state: link
+        force: true # Overwrite existing file with link
+      loop:
+        - "greeting.sh"
+        - "greeting.txt"
+    - name: "Dotfiles/.bashrc: Link from dotfiles repo"
+      ansible.builtin.file:
+        src: /home/{{ personalization_user }}/dotfiles/.bashrc
+        dest: /home/{{ personalization_user }}/.bashrc
+        state: link
+        force: true # Overwrite existing file with link
+
+# Requires vim, Vundle
+- name: "Dotfiles/.vim/colors/puttehi-dark.vim"
+  become: false
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  block:
+    - name: "Dotfiles/.vim/colors/puttehi-dark.vim: Ensure directory"
+      ansible.builtin.file:
+        path: /home/{{ personalization_user }}/.vim/colors
+        state: directory
+    - name: "Dotfiles/.vim/colors/puttehi-dark.vim: Link file"
+      ansible.builtin.file:
+        src: /home/{{ personalization_user }}/dotfiles/.vim/colors/puttehi-dark.vim
+        dest: /home/{{ personalization_user }}/.vim/colors/puttehi-dark.vim
+        state: link
+        force: true # Overwrite existing file with link
+
+- name: "Dotfiles/.vimrc"
+  become: false
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  block:
+    - name: "Dotfiles/.vimrc: Link from dotfiles repo"
+      ansible.builtin.file:
+        src: /home/{{ personalization_user }}/dotfiles/.vimrc
+        dest: /home/{{ personalization_user }}/.vimrc
+        state: link
+        force: true # Overwrite existing file with link
+    - name: "Dotfiles/.vimrc: Run Vundle"
+      ansible.builtin.command: "vim +PluginInstall +qall"
+

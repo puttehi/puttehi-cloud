@@ -1,0 +1,19 @@
+# Deploy personal VPS Nanode
+---
+- name: Base setup
+  hosts: all
+  become: yes
+  tasks:
+    - include_role:
+        name: "base_setup"
+      vars:
+        ansible_ssh_user: root
+        base_users:
+          puttehi:
+            sudoer: true
+            groups: ""
+            public_keys:
+              - "~/.ssh/linode-vps-puttehi.pub"
+            shell: "/usr/bin/bash"
+            password: "*"
+

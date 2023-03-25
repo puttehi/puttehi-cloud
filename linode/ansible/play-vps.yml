@@ -1,6 +1,6 @@
-# Deploy personal VPS Nanode
----
-- name: Configure personal VPS
-  hosts: all
-  roles:
-    - role: "puttehi_vps"
+# Deploy personal VPS Nanode from scratch
+- name: Base setup VPS
+  ansible.builtin.import_playbook: play-base-setup.yaml
+
+- name: Personalize VPS
+  ansible.builtin.import_playbook: play-personalize.yml

@@ -1,0 +1,11 @@
+# Deploy dotfiles only, needs git etc.
+---
+- name: Dotfiles only
+  hosts: all
+  tasks:
+    - include_role:
+        name: "personalization"
+      vars:
+        ansible_ssh_user: "puttehi"
+        personalization_user: "puttehi"
+        personalization_dotfiles_repo_deploy_key_path: "/home/puttehi/.ssh/github-debi"

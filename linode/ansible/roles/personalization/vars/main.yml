@@ -1,0 +1,14 @@
+---
+# Any extra keys to copy?
+# personalization_ssh_keys_public: ["~/.ssh/my-github-key.pub"]
+# personalization_ssh_keys_private: ["~/.ssh/my-github-key"]
+# Who are we setting up?
+# personalization_user: "my-username"
+# Oh My Posh version? Latest used if not given
+# personalization_omp_version: "v8.17.0"
+# Oh My Posh theme name? Legacy themes might require legacy version.
+# personalization_omp_theme: "my-thetme.omp.json"
+# Hostname?
+# personalization_hostname: "the-hostname"
+# Dotfiles repo SSH key path? Probably set in ssh_keys above?
+# personalization_dotfiles_repo_deploy_key_path: "~/.ssh/my-github-key"

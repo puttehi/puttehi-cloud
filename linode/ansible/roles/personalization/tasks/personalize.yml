@@ -1,0 +1,114 @@
+- name: Update package manager cache
+  include_tasks: package_update.yml
+
+- name: Upgrade installed packages
+  include_tasks: package_upgrade.yml
+
+- name: "Install packages"
+  become: true
+  ansible.builtin.package:
+    name:
+      - git
+      - python3
+      - curl
+      - wget
+      - ripgrep
+      - fd-find
+      - bat
+      - fzf
+      - tldr
+      - tree
+      - zoxide
+      - lolcat
+    state: latest
+
+- name: "Copy SSH Keys: Ensure /home/{{ personalization_user }}/.ssh permissions"
+  ansible.builtin.file:
+    path: "/home/{{ personalization_user }}/.ssh"
+    state: directory
+    mode: u=rwx,g=rwx,o=rx
+
+- name: "Copy SSH keys: Public"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/home/{{ personalization_user }}/.ssh/{{ item | basename }}"
+    owner: "{{ personalization_user }}"
+    group: "{{ personalization_user }}"
+    mode: u=rw,g=r,o=r
+  loop: "{{ personalization_ssh_keys_public }}"
+
+- name: "Copy SSH keys: Private"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/home/{{ personalization_user }}/.ssh/{{ item | basename }}"
+    owner: "{{ personalization_user }}"
+    group: "{{ personalization_user }}"
+    mode: u=rw,g=,o=
+  loop: "{{ personalization_ssh_keys_private }}"
+
+- name: "Install Oh My Posh: Download latest"
+  become: true
+  become_user: "{{ personalization_user }}"
+  ansible.builtin.command: wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh
+  when: personalization_omp_version is not defined
+
+- name: "Install Oh My Posh: Download desired"
+  become: true
+  ansible.builtin.command: "wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/download/{{ personalization_omp_version }}/posh-linux-amd64 -O /usr/local/bin/oh-my-posh"
+  when: personalization_omp_version is defined
+
+- name: "Install Oh My Posh: Make executable"
+  become: true
+  become_user: "{{ personalization_user }}"
+  ansible.builtin.file:
+    path: /usr/local/bin/oh-my-posh
+    mode: u+x
+
+- name: "Install Oh My Posh: Ensure theme directory exists"
+  become: true
+  become_user: "{{ personalization_user }}"
+  ansible.builtin.file:
+    path: "/home/{{ personalization_user }}/.poshthemes"
+    state: directory
+    owner: "{{ personalization_user }}"
+    group: "{{ personalization_user }}"
+    mode: u=rwx,g=wx,o=wx
+
+- name: "Install Oh My Posh: Copy theme if given"
+  become: true
+  become_user: "{{ personalization_user }}"
+  ansible.builtin.copy:
+    src: "{{ personalization_omp_theme }}"
+    dest: "/home/{{ personalization_user }}/.poshthemes/{{ personalization_omp_theme | basename }}"
+    owner: "{{ personalization_user }}"
+    group: "{{ personalization_user }}"
+    mode: u=rw,g=r,
+  when: personalization_omp_theme is defined
+
+- name: "Install Vundle for vim: Download to .vim/bundle"
+  become: true
+  become_user: "{{ personalization_user }}"
+  ansible.builtin.git:
+    repo: https://github.com/VundleVim/Vundle.vim.git
+    dest: /home/{{ personalization_user }}/.vim/bundle/Vundle.vim"
+    remote: origin
+    update: true
+
+
+- name: "Install NVM v0.39.3: Download and pipe to bash"
+  become: true
+  become_user: "{{ personalization_user }}"
+  ansible.builtin.shell: "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash"
+  args:
+    executable: /bin/bash
+    chdir: "/home/{{ personalization_user }}"
+    creates: "/home/{{ personalization_user }}/.nvm/nvm.sh"
+
+- name: "Hostname: Set hostname"
+  ansible.builtin.hostname:
+    name: "{{ personalization_hostname }}"
+
+- name: "Hostname: Set /etc/hosts"
+  ansible.builtin.lineinfile:
+      line: "127.0.0.1\t{{ personalization_hostname }}"
+      path: "/etc/hosts"

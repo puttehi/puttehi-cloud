@@ -1,8 +1,0 @@
----
-- name: Install tooling
-  include_tasks: cli_tooling.yml
-  loop: "{{ tooling.users }}"
-  loop_control:
-    loop_var: outer_item
-  tags:
-    - utils

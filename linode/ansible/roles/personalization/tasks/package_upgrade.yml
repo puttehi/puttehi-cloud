@@ -1,0 +1,36 @@
+- name: upgrade apt packages
+  ansible.builtin.apt:
+    name: "*"
+    update_cache: yes
+    state: latest
+  when: ansible_pkg_mgr == "apt"
+
+- name: upgrade yum packages
+  ansible.builtin.yum:
+    name: "*"
+    update_cache: yes
+  when: ansible_pkg_mgr == "yum"
+
+- name: upgrade apk packages
+  community.general.apk:
+    name: "*"
+    update_cache: yes
+  when: ansible_pkg_mgr == "apk"
+
+- name: upgrade dnf packages
+  ansible.builtin.dnf:
+    name: "*"
+    update_cache: yes
+  when: ansible_pkg_mgr == "dnf"
+
+- name: upgrade zypper packages
+  community.general.zypper:
+    name: "*"
+    update_cache: yes
+  when: ansible_pkg_mgr == "zypper"
+
+- name: upgrade pacman packages
+  community.general.pacman:
+    name: "*"
+    update_cache: yes
+  when: ansible_pkg_mgr == "pacman"
