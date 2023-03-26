@@ -15,6 +15,7 @@ vps.puttehi.eu:
 setup: venv
 	$(VENV) pip install wheel
 	$(VENV) pip install -r requirements.txt
+	$(VENV) ansible-galaxy install -r requirements.yml
 
 venv:
 	python3 -m venv venv

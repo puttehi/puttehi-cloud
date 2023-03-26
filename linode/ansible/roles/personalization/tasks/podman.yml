@@ -1,0 +1,25 @@
+---
+- name: Install podman
+  become: true
+  ansible.builtin.package:
+    name: podman
+    state: latest
+
+- name: Hello world in podman
+  become: true
+  become_user: "{{ personalization_user }}"
+  remote_user: "{{ personalization_user }}"
+  block:
+    - name: "Hello world: Pull httpd"
+      containers.podman.podman_image:
+        name: "docker.io/library/httpd"
+    - name: "Hello world: Start container at --> {{ inventory_hostname }}:8080 <--"
+      containers.podman.podman_container:
+        name: "httpd"
+        image: "docker.io/library/httpd"
+        state: started
+        ports:
+          - "8080:80/tcp"
+        detach: true
+        tty: true
+  when: personalization_podman_hello_world is defined and personalization_podman_hello_world == true

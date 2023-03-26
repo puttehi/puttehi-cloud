@@ -20,3 +20,10 @@
   when:
     - personalization_user is defined
     - personalization_install_nvim is defined and personalization_install_nvim | bool
+
+- name: "Podman"
+  include_tasks: podman.yml
+  when:
+    - personalization_user is defined
+    - personalization_install_podman is defined and personalization_install_podman | bool
+

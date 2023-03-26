@@ -1,0 +1,13 @@
+# Deploy dotfiles only, needs git etc.
+---
+- name: Podman only
+  hosts: all
+  tasks:
+    - include_role:
+        name: "personalization"
+      vars:
+        ansible_ssh_user: "puttehi"
+        personalization_user: "puttehi"
+        personalization_install_podman: true
+        personalization_podman_hello_world: true
+
