@@ -1,0 +1,47 @@
+# Vouch Proxy configuration
+# bare minimum to get Vouch Proxy running with github
+
+vouch:
+  logLevel: debug
+  # domains:
+  # valid domains that the jwt cookies can be set into
+  # the callback_urls will be to these domains
+  # for github that's only one domain since they only allow one callback URL
+  # https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls
+  # each of these domains must serve the url https://login.$domains[0] https://login.$domains[1] ...
+  domains:
+  - puttehi.eu
+
+  # false == use whitelist or teamWhitelist
+  # allowAllUsers: true
+
+  cookie:
+    # allow the jwt/cookie to be set into http://yourdomain.com (defaults to true, requiring https://yourdomain.com)
+    secure: false #TODO
+    # vouch.cookie.domain must be set when enabling allowAllUsers
+    #  domain: yourdomain.com
+
+
+  whitelist:
+    - puttehi
+  # set teamWhitelist: to list of teams and/or GitHub organizations
+  # When putting an organization id without a slash, it will allow all (public) members from the organization.
+  # The client will try to read the private organization membership using the client credentials, if that's not possible
+  # due to access restriction, it will try to evaluate the publicly visible membership.
+  # Allowing members form a specific team can be configured by qualifying the team with the organization, separated by
+  # a slash.
+  # teamWhitelist:
+  # - myOrg
+  # - myOrg/myTeam
+  # In case both vouch.teamWhitelist AND oauth.scopes is configured, make sure read:org scope is included
+
+oauth:
+  # create a new OAuth application at:
+  # https://github.com/settings/applications/new
+  #
+  # callback_url is configured at github.com when setting up the app
+  # Set to e.g. https://vouch.yourdomain.com/auth or https://yourdomain.com/vp_in_a_path/auth
+  provider: github
+  client_id: {{ github_client_id }}
+  client_secret: {{ github_client_secret }}
+  # endpoints set from https://godoc.org/golang.org/x/oauth2/github

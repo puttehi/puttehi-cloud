@@ -1,0 +1,25 @@
+- name: "Nginx only"
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - include_role:
+        name: "deployment/nginx"
+      vars:
+        nginx_user: "nginx"
+        nginx_domain: "vps.puttehi.eu"
+        nginx_reverse_proxy:
+          "/": "http://localhost:8080"
+          "/hello": "http://localhost:8081"
+        nginx_cert_path: "/etc/letsencrypt/live"
+        nginx_linode_key_file: "../secrets/linode_debi-domains"
+        certbot_create_method: standalone
+        certbot_force_renew: true
+        certbot_hsts: false
+        certbot_testmode: false
+        certbot_admin_email: zittingpetteri@gmail.com
+        certbot_create_if_missing: true
+        certbot_create_standalone_stop_services: []
+        certbot_certs:
+          - domains:
+            - "*.puttehi.eu"

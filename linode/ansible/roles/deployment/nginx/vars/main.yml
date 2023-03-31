@@ -1,0 +1,3 @@
+nginx_user: "nginx"
+nginx_domain: "www.example.com"
+nginx_cert_path: "/etc/letsencrypt/live"

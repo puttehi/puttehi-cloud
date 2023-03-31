@@ -1,0 +1,94 @@
+---
+- name: "Nginx: Make linode.ini for DNS challenge to /root/.ssh"
+  ansible.builtin.template:
+    src: "linode.ini.j2"
+    dest: "/root/.ssh/linode.ini"
+    owner: root
+    group: root
+    mode: u=rw,g=,o=
+  when: nginx_linode_key_file is defined
+
+- name: "Nginx: Issue wildcard Linode TLS certificate with Certbot"
+  become: true
+  containers.podman.podman_container:
+    name: certbot # --name certbot
+    image: "docker.io/certbot/certbot" # certbot/certbot
+    remove: true # --rm
+    interactive: true # -i
+    tty: true # -t
+    volumes:
+      - "/etc/letsencrypt:/etc/letsencrypt"
+      - "/var/lib/letsencrypt:/var/lib/letsencrypt"
+    command: >-
+      {{ "renew --force-renewal" if certbot_force_renew else "certonly" }}
+      --{{ certbot_create_method }}
+      {{ '--hsts' if certbot_hsts else '' }}
+      {{ '--test-cert' if certbot_testmode else '' }}
+      --noninteractive
+      --agree-tos
+      --email {{ cert_item.email | default(certbot_admin_email) }}
+      {{ '--webroot-path ' if certbot_create_method == 'webroot'  else '' }}
+      {{ cert_item.webroot | default(certbot_webroot) if certbot_create_method == 'webroot' else '' }}
+      -d {{ cert_item.domains | join(',') }}
+      --dns-linode
+      --dns-linode-credentials /root/.ssh/linode.ini
+  when:
+    - certbot_certs is defined
+    - nginx_linode_key_file is defined
+  with_items: "{{ certbot_certs }}"
+  loop_control:
+    loop_var: cert_item
+
+- name: "Nginx: Issue TLS certificate with Certbot"
+  include_role:
+    name: geerlingguy.certbot
+  when:
+    - certbot_certs is defined
+    - nginx_linode_key_file is not defined
+
+- name: "Nginx: Ensure nginx user"
+  become: true
+  ansible.builtin.user:
+    name: "{{ nginx_user }}"
+    password: "*"
+    state: present
+
+- name: "Nginx: Install"
+  become: true
+  become_user: root
+  ansible.builtin.package:
+    name: "nginx"
+    state: latest
+  notify: "Nginx handler: Restart Nginx"
+
+- name: "Nginx: Template Nginx configuration"
+  become: true
+  become_user: root
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: "root"
+    group: "root"
+    mode: u=rwx,g=r,o=r
+  notify: "Nginx handler: Reload configuration"
+
+- name: "Nginx: Template reverse proxy configuration"
+  become: true
+  become_user: root
+  ansible.builtin.template:
+    src: default.conf.j2
+    dest: /etc/nginx/conf.d/default.conf
+    owner: "root"
+    group: "root"
+    mode: u=rwx,g=r,o=r
+  notify: "Nginx handler: Reload configuration"
+
+- name: "Nginx: Template logrotate configuration"
+  become: true
+  become_user: root
+  ansible.builtin.template:
+    src: nginx.j2
+    dest: /etc/logrotate.d/nginx
+    owner: "root"
+    group: "root"
+    mode: u=rw,g=r,o=r

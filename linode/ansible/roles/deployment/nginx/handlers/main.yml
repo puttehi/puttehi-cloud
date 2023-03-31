@@ -1,0 +1,11 @@
+---
+- name: "Nginx handler: Restart Nginx"
+  ansible.builtin.service:
+    name: "nginx"
+    state: restarted
+
+- name: "Nginx handler: Reload configuration"
+  ansible.builtin.service:
+    name: "nginx"
+    state: reloaded
+

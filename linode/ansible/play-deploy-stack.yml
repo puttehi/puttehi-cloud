@@ -1,0 +1,82 @@
+# Deploy stack of services
+# Assumes Nginx is already installed with certs using roles/deployment/nginx (see play-nginx.yml)
+---
+- name: "Deploy stack"
+  hosts: all
+  handlers:
+    - name: "Nginx handler: Reload configuration"
+      ansible.builtin.service:
+        name: "nginx"
+        state: reloaded
+  tasks:
+    - name: "Nginx: Template Nginx config for the stack"
+      ansible.builtin.template:
+        src: "default.conf.j2"
+        dest: "/etc/nginx/conf.d/default.conf"
+        owner: "root"
+        group: "root"
+        mode: u=rwx,g=r,o=r
+        force: true # Change if contents changes even if file already exists
+      vars:
+        nginx_domain: "vps.puttehi.eu"
+        nginx_reverse_proxy:
+          "/": "http://localhost:8080"
+          "/hello": "http://localhost:8081"
+        nginx_cert_path: "/etc/letsencrypt/live"
+      notify: "Nginx handler: Reload configuration"
+
+    - name: "Vouch: Create config dir"
+      ansible.builtin.file:
+        path: "/root/config"
+        state: directory
+        mode: u=rwx,g=rx,o=rx
+        owner: "root"
+        group: "root"
+
+    - name: "Vouch: Template config.yml"
+      ansible.builtin.template:
+        src: "config.yml.j2"
+        dest: "/root/config/config.yml"
+        mode: u=rwx,g=,o=
+        owner: "root"
+        group: "root"
+        force: true
+      vars:
+        github_client_id: "{{ lookup('file', '~/.ssh/vps/github_client_id') }}"
+        github_client_secret: "{{ lookup('file', '~/.ssh/vps/github_client_secret') }}"
+
+    - name: "Podman: root / vouch-proxy"
+      include_role:
+        name: "deployment/podman"
+      vars:
+        podman_user: "root"
+        podman_containers:
+          - name: "vouch-proxy"
+            image: "quay.io/vouch/vouch-proxy"
+            detach: true
+            ports:
+              - "127.0.0.1:9090:9090"
+            volumes:
+              - "/root/config:/config"
+
+    - name: "Podman: puttehi / httpd, hello-world"
+      include_role:
+        name: "deployment/podman"
+      vars:
+        podman_user: "puttehi"
+        podman_containers:
+          - name: "httpd"
+            image: "docker.io/library/httpd"
+            state: started
+            ports:
+              - "127.0.0.1:8080:80/tcp"
+            detach: true
+            tty: true
+          - name: "hello-world"
+            image: "docker.io/strm/helloworld-http"
+            state: started
+            ports:
+              - "127.0.0.1:8081:80/tcp"
+            detach: true
+            tty: true
+

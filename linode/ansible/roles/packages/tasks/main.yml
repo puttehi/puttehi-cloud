@@ -1,0 +1,12 @@
+- name: Update package manager cache
+  include_tasks: package_update.yml
+  when:
+    - "{{ packages_update is defined }}"
+    - "{{ (packages_update | bool) == true }}"
+
+- name: Upgrade installed packages
+  include_tasks: package_upgrade.yml
+  when:
+    - "{{ packages_upgrade is defined }}"
+    - "{{ (packages_upgrade | bool) == true }}"
+

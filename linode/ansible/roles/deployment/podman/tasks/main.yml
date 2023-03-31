@@ -1,0 +1,14 @@
+- name: Install podman
+  include_tasks: podman.yml
+  when:
+    - "{{ podman_install is defined }}"
+    - "{{ (podman_install | bool) == true }}"
+
+- name: Deploy container(s)
+  include_tasks: deploy.yml
+  when:
+    - "{{ podman_containers is defined }}"
+  loop: "{{ podman_containers }}"
+  loop_control:
+    loop_var: "outer_item"
+

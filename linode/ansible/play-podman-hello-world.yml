@@ -1,0 +1,10 @@
+# Deploy dotfiles only, needs git etc.
+---
+- name: Podman only
+  hosts: all
+  tasks:
+    - include_role:
+        name: "deployment/podman_hello_world"
+      vars:
+        podman_hello_world_user: "puttehi"
+

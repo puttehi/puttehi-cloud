@@ -1,0 +1,13 @@
+---
+- name: Update package cache
+  include_role:
+    name: "packages"
+  vars:
+    packages_update: true
+
+- name: Install podman
+  become: true
+  ansible.builtin.package:
+    name: podman
+    state: latest
+

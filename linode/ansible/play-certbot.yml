@@ -1,0 +1,15 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    ansible_ssh_user: "puttehi"
+    certbot_create_command: "{{ certbot_script }} certonly --standalone --noninteractive --agree-tos --email {{ cert_item.email | default(certbot_admin_email) }} -d {{ cert_item.domains | join(',') }} --dns-godaddy"
+    certbot_admin_email: zittingpetteri@gmail.com
+    certbot_create_if_missing: true
+    certbot_create_standalone_stop_services: []
+    certbot_certs:
+      - domains:
+        - "vps.puttehi.eu"
+  roles:
+    - geerlingguy.certbot
+
