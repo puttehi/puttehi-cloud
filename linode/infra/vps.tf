@@ -7,6 +7,10 @@ terraform {
   required_version = "~>1.4.0"
 }
 
+provider "linode" {
+  # token = ... #env: LINODE_TOKEN
+}
+
 # Root from GoDaddy
 resource "linode_domain" "puttehi_eu" {
   type      = "master"
@@ -14,20 +18,25 @@ resource "linode_domain" "puttehi_eu" {
   soa_email = "zittingpetteri@gmail.com"
 }
 
-# www.puttehi.eu -> puttehi.eu
-resource "linode_domain_record" "www" {
+# puttehi.eu -> instance
+resource "linode_domain_record" "root_to_instance" {
   domain_id   = linode_domain.puttehi_eu.id
-  name        = "www"
-  record_type = "CNAME"
-  target      = linode_domain.puttehi_eu.domain
-}
-
-# vps.puttehi.eu -> vps
-resource "linode_domain_record" "vps" {
-  domain_id   = linode_domain.puttehi_eu.id
-  name        = "vps"
+  name        = linode_domain.puttehi_eu.domain # Used as "@" in web GUI
   record_type = "A"
   target      = linode_instance.vps.ip_address
+  ttl_sec     = 300
+}
+
+# *.puttehi.eu -> puttehi.eu
+# www. (public)
+# vps. (private)
+# anything-new. (...)
+resource "linode_domain_record" "wildcard_to_root" {
+  domain_id   = linode_domain.puttehi_eu.id
+  name        = "*"
+  record_type = "CNAME"
+  target      = linode_domain.puttehi_eu.domain
+  ttl_sec     = 300
 }
 
 # Get user profile according to token
