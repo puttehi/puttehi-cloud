@@ -1,5 +1,44 @@
 # TODO: Template properly instead of hardcoding most of the stuff
 
+############ Public subdomain ###########
+upstream puttehi.eu {
+	server localhost:80;
+}
+
+# puttehi.eu (CNAME should exist for www.)
+server {
+	server_name puttehi.eu;
+	listen 80;
+    # Access log per host
+	access_log /var/log/nginx/$host-access.log;
+    # Enable solving DNS challenges with Certbot
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+	# Redirect to HTTPS
+    return 302 https://$host$request_uri;
+}
+
+server {
+	server_name puttehi.eu;
+	listen 443 ssl http2;
+    # Access log per host
+	access_log /var/log/nginx/$host-access.log;
+
+    # Wildcart cert
+    # TODO: Fix nginx_domain to common cert path
+    ssl_certificate {{ nginx_cert_path }}/{{ nginx_domain }}/fullchain.pem;
+	ssl_certificate_key {{ nginx_cert_path }}/{{ nginx_domain }}/privkey.pem;
+
+    #!!!!!!!!!!!!# UNPROTECTED paths #!!!!!!!!!!!!#
+
+    {% for loc, proxy_dest in nginx_reverse_proxy_public.items() %}
+    location {{ loc }} {
+    	proxy_pass {{ proxy_dest }};
+    }
+    {% endfor %}
+}
+
 ############ Main subdomain  ############
 # {{ nginx_domain }}
 upstream {{ nginx_domain }} {

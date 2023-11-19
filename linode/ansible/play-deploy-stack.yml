@@ -22,6 +22,8 @@
         nginx_reverse_proxy:
           "/": "http://localhost:8080"
           "/hello": "http://localhost:8081"
+        nginx_reverse_proxy_public:
+          "/": "http://localhost:9000"
         nginx_cert_path: "/etc/letsencrypt/live"
       notify: "Nginx handler: Reload configuration"
 
@@ -77,6 +79,13 @@
             state: started
             ports:
               - "127.0.0.1:8081:80/tcp"
+            detach: true
+            tty: true
+          - name: "htmx-go-portfolio"
+            image: "no-registry.local/htmx-go-portfolio" # podman save + scp + podman load (make podman-transport && make podman tarball)
+            state: started
+            ports:
+              - "127.0.0.1:9000:3000/tcp"
             detach: true
             tty: true
 

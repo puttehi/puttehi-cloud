@@ -1,0 +1,31 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  become_user: "puttehi"
+  vars:
+    ansible_ssh_user: "puttehi"
+  tasks:
+    - name: Make destination directory
+      ansible.builtin.file:
+        path: /home/puttehi/htmx-go-portfolio
+        state: directory
+        mode: '0755'
+        owner: puttehi
+        group: puttehi
+
+    - name: Copy the tarball
+      ansible.builtin.copy:
+        src: /home/puttehi/tmp/htmx-go-portfolio/latest.tar # make podman-tarball in repository
+        dest: /home/puttehi/htmx-go-portfolio/latest.tar
+        owner: puttehi
+        group: puttehi
+
+    - name: Load all image(s) from the copied tar file
+      containers.podman.podman_load:
+        input: /home/puttehi/htmx-go-portfolio/latest.tar
+      register: result
+
+    - name: Print the loaded image metadata
+      ansible.builtin.debug:
+        msg: "Loaded the following images: {{ result }}"
+
