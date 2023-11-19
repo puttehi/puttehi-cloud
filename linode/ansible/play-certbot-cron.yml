@@ -1,0 +1,32 @@
+- name: "Setup Certbot automatic renewal"
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Template renewal script
+      ansible.builtin.template:
+        src: "certbot-renew.sh.j2"
+        dest: "/root/certbot-renew.sh"
+        owner: "root"
+        group: "root"
+        mode: u=rwx,g=r,o=r
+        force: true # Change if contents changes even if file already exists
+    - name: "Ensure certbot log directory exists"
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "root"
+        group: "root"
+        mode: u=rwx,g=rx,o=rx
+      with_items:
+        - /var/log/letsencrypt
+    - name: Ensure crontab entry exists (0 0 1 1-12/1 *)
+      ansible.builtin.cron:
+        name: "renew certificate"
+        hour: "0" # 00
+        minute: "0" # :00
+        day: "1" # first day
+        month: "1-12/1" # monthly
+        job: "/root/certbot-renew.sh"
+        user: root

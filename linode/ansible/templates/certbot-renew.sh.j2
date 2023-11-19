@@ -1,0 +1,4 @@
+#!/bin/bash
+
+podman run -v /etc/letsencrypt:/etc/letsencrypt -v /var/lib/letsencrypt/var/lib/letsencrypt -v /var/log/letsencrypt:/var/log/letsencrypt -v /root/.ssh/linode.ini:/root/.ssh/linode.ini:ro --rm -it --name certbot docker.io/certbot/dns-linode renew --dns-linode --dns-linode-credentials /root/.ssh/linode.ini
+nginx -s reload

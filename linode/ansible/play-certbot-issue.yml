@@ -1,0 +1,64 @@
+- name: "Certbot issue only"
+  hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    nginx_linode_key_file: "../secrets/linode_debi-domains"
+    certbot_force_renew: true
+    certbot_testmode: false
+    certbot_admin_email: zittingpetteri@gmail.com
+    certbot_certs:
+      - domains:
+        - "*.puttehi.eu"
+        - "puttehi.eu" # Actual server * CNAMEs to
+  tasks:
+    - name: "Make linode.ini for DNS challenge to /root/.ssh"
+      become: true
+      ansible.builtin.template:
+        src: "linode.ini.j2"
+        dest: "/root/.ssh/linode.ini"
+        owner: root
+        group: root
+        mode: u=rw,g=,o=
+    - name: "Make certbot directories"
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "root"
+        group: "root"
+        mode: u=rwx,g=rx,o=rx
+      with_items:
+        - /var/lib/letsencrypt
+        - /var/log/letsencrypt
+        - /etc/letsencrypt
+    - name: "Issue Linode TLS certificates with Certbot"
+      become: true
+      containers.podman.podman_container:
+        name: certbot # --name certbot
+        image: "docker.io/certbot/dns-linode" # certbot/certbot
+        remove: true # --rm
+        interactive: true # -i
+        tty: true # -t
+        detach: false # Wait for execution
+        volumes:
+          - "/etc/letsencrypt:/etc/letsencrypt"
+          - "/var/lib/letsencrypt:/var/lib/letsencrypt"
+          - "/var/log/letsencrypt:/var/log/letsencrypt"
+          - "/root/.ssh/linode.ini:/root/.ssh/linode.ini"
+        command: >-
+          certonly
+          {{ "--force-renewal" if certbot_force_renew }}
+          {{ '--test-cert' if certbot_testmode }}
+          --noninteractive
+          --agree-tos
+          --email {{ cert_item.email | default(certbot_admin_email) }}
+          --dns-linode
+          --dns-linode-credentials /root/.ssh/linode.ini
+          -d {{ cert_item.domains | join(',') }}
+      when:
+        - certbot_certs is defined
+        - nginx_linode_key_file is defined
+      with_items: "{{ certbot_certs }}"
+      loop_control:
+        loop_var: cert_item

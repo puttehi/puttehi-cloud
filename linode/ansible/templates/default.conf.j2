@@ -1,34 +1,27 @@
 # TODO: Template properly instead of hardcoding most of the stuff
+# TODO: Fix nginx_domain to common cert path
 
-############ Public subdomain ###########
-upstream puttehi.eu {
-	server localhost:80;
-}
+ssl_certificate {{ nginx_cert_path }}/puttehi.eu/fullchain.pem;
+ssl_certificate_key {{ nginx_cert_path }}/puttehi.eu/privkey.pem;
 
-# puttehi.eu (CNAME should exist for www.)
+# *. / puttehi.eu (CNAME should exist for wildcard)
+# HTTPS redirect
 server {
-	server_name puttehi.eu;
+	server_name *.puttehi.eu puttehi.eu;
 	listen 80;
     # Access log per host
 	access_log /var/log/nginx/$host-access.log;
-    # Enable solving DNS challenges with Certbot
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
+
 	# Redirect to HTTPS
     return 302 https://$host$request_uri;
 }
 
+# Actual server behind HTTPS (needs wildcard cert)
 server {
-	server_name puttehi.eu;
+	server_name *.puttehi.eu puttehi.eu;
 	listen 443 ssl http2;
     # Access log per host
 	access_log /var/log/nginx/$host-access.log;
-
-    # Wildcart cert
-    # TODO: Fix nginx_domain to common cert path
-    ssl_certificate {{ nginx_cert_path }}/{{ nginx_domain }}/fullchain.pem;
-	ssl_certificate_key {{ nginx_cert_path }}/{{ nginx_domain }}/privkey.pem;
 
     #!!!!!!!!!!!!# UNPROTECTED paths #!!!!!!!!!!!!#
 
@@ -39,21 +32,39 @@ server {
     {% endfor %}
 }
 
-############ Main subdomain  ############
-# {{ nginx_domain }}
-upstream {{ nginx_domain }} {
-	server localhost:80;
+# Private subdomain ({{ nginx_domain }})
+# Overrides wildcard for auth
+
+# Vouch only handles auth
+# Must be running in localhost:9090
+upstream vouch.puttehi.eu {
+    server localhost:9090;
 }
 
+server {
+	server_name vouch.puttehi.eu;
+	listen 80;
+	access_log /var/log/nginx/$host-access.log;
+	return 302 https://$host$request_uri;
+}
+
+server {
+	server_name vouch.puttehi.eu;
+	listen 443 ssl http2;
+	access_log /var/log/nginx/$host-access.log;
+
+	location / {
+		proxy_pass http://vouch.puttehi.eu;
+	}
+}
+
+# Actual subdomain
 server {
 	server_name {{ nginx_domain }};
 	listen 80;
     # Access log per host
 	access_log /var/log/nginx/$host-access.log;
-    # Enable solving DNS challenges with Certbot
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
+
 	# Redirect to HTTPS
     return 302 https://$host$request_uri;
 }
@@ -63,9 +74,6 @@ server {
 	listen 443 ssl http2;
     # Access log per host
 	access_log /var/log/nginx/$host-access.log;
-
-    ssl_certificate {{ nginx_cert_path }}/{{ nginx_domain }}/fullchain.pem;
-	ssl_certificate_key {{ nginx_cert_path }}/{{ nginx_domain }}/privkey.pem;
 
     # Ensure auth from Vouch path
 	auth_request /validate;
@@ -107,29 +115,5 @@ server {
     	proxy_pass {{ proxy_dest }};
     }
     {% endfor %}
-}
-
-########### Vouch proxy subdomain ###########
-# Only handles auth
-upstream vouch.puttehi.eu {
-    server localhost:9090;
-}
-
-server {
-	server_name vouch.puttehi.eu;
-	listen 80;
-	access_log /var/log/nginx/$host-access.log;
-	return 302 https://$host$request_uri;
-}
-server {
-	server_name vouch.puttehi.eu;
-	listen 443 ssl http2;
-	access_log /var/log/nginx/$host-access.log;
-    # Same wildcard cert as main domain
-	ssl_certificate {{ nginx_cert_path }}/{{ nginx_domain }}/fullchain.pem;
-	ssl_certificate_key {{ nginx_cert_path }}/{{ nginx_domain }}/privkey.pem;
-	location / {
-		proxy_pass http://vouch.puttehi.eu;
-	}
 }
 
