@@ -74,6 +74,8 @@
               - "127.0.0.1:8080:80/tcp"
             detach: true
             tty: true
+            log_opt:
+              max_size: "10mb"
           - name: "hello-world"
             image: "docker.io/strm/helloworld-http"
             state: started
@@ -81,6 +83,8 @@
               - "127.0.0.1:8081:80/tcp"
             detach: true
             tty: true
+            log_opt:
+              max_size: "10mb"
           - name: "htmx-go-portfolio"
             image: "no-registry.local/htmx-go-portfolio" # podman save + scp + podman load (make podman-transport && make podman tarball)
             state: started
@@ -88,4 +92,6 @@
               - "127.0.0.1:9000:3000/tcp"
             detach: true
             tty: true
+            log_opt:
+              max_size: "100mb"
 
