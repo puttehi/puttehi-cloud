@@ -10,11 +10,11 @@
         password: "{{ outer_item.login_password }}"
         registry: "{{ outer_item.login_registry }}"
       when:
-        - outer_item.login_registry is defined
-        - outer_item.login_user is defined
-        - outer_item.login_password is defined
+        - outer_item.login_config is defined
     - name: "Deploy container: Pull container image"
       containers.podman.podman_image:
         name: "{{ outer_item.image }}"
     - name: "Deploy container: Set container configuration"
-      containers.podman.podman_container: "{{ outer_item }}"
+      # login_config is invalid for podman_container, let's drop it
+      # https://stackoverflow.com/a/74475354
+      containers.podman.podman_container: "{{ outer_item | combine({ 'login_config': omit }) }}"

@@ -108,10 +108,11 @@
               max_size: "10mb"
           - name: "htmx-go-portfolio"
             image: "ghcr.io/puttehi/htmx-go-portfolio:53073c22d61f2fdcab9029744d755c7bcfc6c9d4"
-            # Remember to allow repository in GitHub Packages to be able to login and pull
-            login_registry: ghcr.io
-            login_user: "{{ lookup('ansible.builtin.env', 'PODMAN_USER') }}" # github.actor
-            login_password: "{{ lookup('ansible.builtin.env', 'PODMAN_PASSWORD') }}" # github.token
+            login_config:
+              # Remember to allow repository in GitHub Packages to be able to login and pull
+              login_registry: ghcr.io
+              login_user: "{{ lookup('ansible.builtin.env', 'PODMAN_USER') }}" # github.actor
+              login_password: "{{ lookup('ansible.builtin.env', 'PODMAN_PASSWORD') }}" # github.token
             volume:
               # Site content
               - "/home/puttehi/htmx-go-portfolio/configs:/configs"
