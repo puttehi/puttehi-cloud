@@ -24,4 +24,5 @@ jobs:
       - name: Deploy stack
         run: |
           cd ${{ env.ANSIBLE_PROJECT_DIR }}
-          make play-ci args="-i inventory/personal.yml --private-key <(echo -n '${{ secrets.SSH_KEY }}') play-deploy-stack.yml"
+          SSH_KEY_FILE=<(echo -n '${{ secrets.SSH_KEY }}') \
+            make play-ci args="-i inventory/personal.yml play-deploy-stack.yml"
