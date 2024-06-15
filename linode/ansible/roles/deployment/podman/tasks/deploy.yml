@@ -1,7 +1,5 @@
 ---
 - name: "Deploy container {{ outer_item.image }}"
-  # Double-ensure secrets are not leaked to logs. NOTE: ANSIBLE_DEBUG overrides this
-  no_log: true
   become: true
   become_user: "{{ podman_user }}"
   remote_user: "{{ podman_user }}"
