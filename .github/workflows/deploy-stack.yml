@@ -34,6 +34,10 @@ jobs:
         run: |
           echo '${{ secrets.SSH_KEY }}' >> ~/.ssh/linode-vps-root
           chmod 600 ~/.ssh/linode-vps-root
+      - name: Setup Vouch proxy config
+          mkdir -p ~/.ssh/vps
+          echo '${{ secrets.VOUCH_CLIENT_ID }}' >> ~/.ssh/vps/github_client_id
+          echo '${{ secrets.VOUCH_CLIENT_SECRET }}' >> ~/.ssh/vps/github_client_secret
       - name: Deploy stack
         run: |
           cd ${{ env.ANSIBLE_PROJECT_DIR }}
