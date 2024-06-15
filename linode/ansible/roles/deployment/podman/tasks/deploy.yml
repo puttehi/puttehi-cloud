@@ -1,14 +1,16 @@
 ---
 - name: "Deploy container {{ outer_item.image }}"
+  # Double-ensure secrets are not leaked to logs. NOTE: ANSIBLE_DEBUG overrides this
+  no_log: true
   become: true
   become_user: "{{ podman_user }}"
   remote_user: "{{ podman_user }}"
   block:
     - name: "Deploy container: Login to registry"
       containers.podman.podman_login:
-        username: outer_item.login_user
-        password: outer_item.login_password
-        registry: outer_item.login_registry
+        username: "{{ outer_item.login_user }}"
+        password: "{{ outer_item.login_password }}"
+        registry: "{{ outer_item.login_registry }}"
       when:
         - outer_item.login_registry is defined
         - outer_item.login_user is defined
@@ -18,4 +20,3 @@
         name: "{{ outer_item.image }}"
     - name: "Deploy container: Set container configuration"
       containers.podman.podman_container: "{{ outer_item }}"
-
