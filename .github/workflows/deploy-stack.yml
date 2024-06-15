@@ -33,6 +33,7 @@ jobs:
       - name: Setup SSH key
         run: |
           echo -n '${{ secrets.SSH_KEY }}' >> ~/.ssh/linode-vps-root
+          chmod 600 ~/.ssh/linode-vps-root
       - name: Deploy stack
         run: |
           cd ${{ env.ANSIBLE_PROJECT_DIR }}
