@@ -1,0 +1,26 @@
+name: "Deploy container stack and update Nginx configuration"
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "linode/ansible/play-deploy-stack.yml"
+jobs:
+  run-playbook:
+    name: "Run Ansible Playbook"
+    runs-on: "ubuntu-latest"
+    env:
+      ANSIBLE_PROJECT_DIR: "linode/ansible"
+      PODMAN_USER: "${{ github.actor }}"
+      PODMAN_PASSWORD: "${{ github.token }}"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Deploy stack
+        run: |
+          cd ${{ env.ANSIBLE_PROJECT_DIR }}
+          make play-ci args="-i inventory/personal.yml --private-key <(echo -n '${{ secrets.SSH_KEY }}') play-deploy-stack.yml"

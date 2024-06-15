@@ -61,7 +61,29 @@
             volumes:
               - "/root/config:/config"
 
-    - name: "Podman: puttehi / httpd, hello-world"
+    - name: "Podman: Ensure htmx-go-portfolio/configs destination exists"
+      ansible.builtin.file:
+        path: /home/puttehi/htmx-go-portfolio/configs
+        state: directory
+        recurse: true
+        mode: "0755"
+        owner: puttehi
+        group: puttehi
+
+    - name: "Podman: Download htmx-go-portfolio site configs"
+      ansible.builtin.get_url:
+        src: "https://raw.githubusercontent.com/puttehi/htmx-go-portfolio/53073c22d61f2fdcab9029744d755c7bcfc6c9d4/configs/{{ item }}"
+        dest: "/home/puttehi/htmx-go-portfolio/configs/{{ item }}"
+        owner: puttehi
+        group: puttehi
+        mode: "0644"
+      with_items:
+        - project-items.json
+        - site-config.json
+        - work-experience-items.json
+
+    - name: "Podman: puttehi / httpd, hello-world, htmx-go-portfolio"
+      no_log: true # Hide secrets (goodbye debugging). NOTE: ANSIBLE_DEBUG overrides this!
       include_role:
         name: "deployment/podman"
       vars:
@@ -86,7 +108,11 @@
             log_opt:
               max_size: "10mb"
           - name: "htmx-go-portfolio"
-            image: "no-registry.local/htmx-go-portfolio" # podman save + scp + podman load (make podman-transport && make podman tarball)
+            image: "ghcr.io/puttehi/htmx-go-portfolio:53073c22d61f2fdcab9029744d755c7bcfc6c9d4"
+            # Remember to allow repository in GitHub Packages to be able to login and pull
+            login_registry: ghcr.io
+            login_user: "{{ lookup('ansible.builtin.env', 'PODMAN_USER') }}" # github.actor
+            login_password: "{{ lookup('ansible.builtin.env', 'PODMAN_PASSWORD') }}" # github.token
             state: started
             ports:
               - "127.0.0.1:9000:3000/tcp"

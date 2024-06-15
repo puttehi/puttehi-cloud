@@ -4,6 +4,15 @@
   become_user: "{{ podman_user }}"
   remote_user: "{{ podman_user }}"
   block:
+    - name: "Deploy container: Login to registry"
+      containers.podman.podman_login:
+        username: outer_item.login_user
+        password: outer_item.login_password
+        registry: outer_item.login_registry
+      when:
+        - outer_item.login_registry is defined
+        - outer_item.login_user is defined
+        - outer_item.login_password is defined
     - name: "Deploy container: Pull container image"
       containers.podman.podman_image:
         name: "{{ outer_item.image }}"
