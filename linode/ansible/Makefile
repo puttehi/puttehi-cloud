@@ -10,7 +10,7 @@ play: setup
 	$(VENV) ansible-playbook $(args)
 
 play-ci: setup
-	PODMAN_USER=$(PODMAN_USER) PODMAN_PASS=$(PODMAN_PASS) $(VENV) ansible-playbook $(args)
+	PODMAN_USER=$(PODMAN_USER) PODMAN_PASSWORD=$(PODMAN_PASSWORD) $(VENV) ansible-playbook $(args)
 
 vps.puttehi.eu:
 	$(VENV) ansible-playbook -i inventory/personal.yml --limit vps.puttehi.eu $(args)
