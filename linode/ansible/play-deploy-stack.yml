@@ -83,7 +83,6 @@
         - work-experience-items.json
 
     - name: "Podman: puttehi / httpd, hello-world, htmx-go-portfolio"
-      no_log: true # Hide secrets (goodbye debugging). NOTE: ANSIBLE_DEBUG overrides this!
       include_role:
         name: "deployment/podman"
       vars:
