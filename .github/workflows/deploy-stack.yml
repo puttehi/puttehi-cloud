@@ -1,5 +1,5 @@
 name: "Deploy container stack and update Nginx configuration"
-run-name: "${{ github.actor }} is deploying the container stack for ${{ github.ref_name }} (commit: ${{ github.sha }})"
+run-name: "${{ github.actor }} is deploying the container stack"
 on:
   push:
     branches:
