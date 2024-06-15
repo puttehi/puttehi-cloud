@@ -9,9 +9,9 @@ help:
 play: setup
 	$(VENV) ansible-playbook $(args)
 
-# Example to pass in GHA secret as SSH key file: SSH_KEY_FILE=<(echo -n '${{ secrets.SSH_KEY }}')
+# Pass in github.actor and github.token for example
 play-ci: setup
-	PODMAN_USER=$(PODMAN_USER) PODMAN_PASSWORD=$(PODMAN_PASSWORD) $(VENV) ansible-playbook --private-key $(SSH_KEY_FILE) $(args)
+	PODMAN_USER=$(PODMAN_USER) PODMAN_PASSWORD=$(PODMAN_PASSWORD) $(VENV) ansible-playbook $(args)
 
 vps.puttehi.eu:
 	$(VENV) ansible-playbook -i inventory/personal.yml --limit vps.puttehi.eu $(args)

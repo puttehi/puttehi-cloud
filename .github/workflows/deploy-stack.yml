@@ -30,8 +30,13 @@ jobs:
           vps.puttehi.eu ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLh2dYMrb5AF5pycm+bjsV1fWmT27Ul6QIcGOxaJnVlBOK/h3sDK4CpG9ckTuPVgHoqedBm6ESDxO+Xv+kXjHtg=
           vps.puttehi.eu ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMFBb3LxsliKezj91JFQDHHZkxvNpZLCd1+tOQkKXr8k
           EOT
+      - name: Setup SSH key
+        run: |
+          echo -n '${{ secrets.SSH_KEY }}' >> ~/.ssh/linode-vps-root
       - name: Deploy stack
         run: |
           cd ${{ env.ANSIBLE_PROJECT_DIR }}
-          SSH_KEY_FILE=<(echo -n '${{ secrets.SSH_KEY }}') \
-            make play-ci args="-i inventory/personal.yml play-deploy-stack.yml"
+          make play-ci args="-i inventory/personal.yml play-deploy-stack.yml"
+      - name: Nuke .ssh
+        if: ${{ always() }}
+        run: rm -rf ~/.ssh
