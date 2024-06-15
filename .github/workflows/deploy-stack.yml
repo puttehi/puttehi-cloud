@@ -6,6 +6,7 @@ on:
       - "main"
     paths:
       - "linode/ansible/play-deploy-stack.yml"
+      - ".github/workflows/deploy-stack.yml"
 jobs:
   run-playbook:
     name: "Run Ansible Playbook"
@@ -21,6 +22,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+      - name: Setup known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          cat <<EOT >> ~/.ssh/known_hosts
+          vps.puttehi.eu ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDazRPpPgPXrTpJqCjAc4Ip1I4shWxrVBhc7BFuhV747pH99ZaXo+ZbGvatZTJQ7rqGgtSSZFnwrTT4TaIwpDxck6i/64MCV2GRVRxjVthNEYHAfIURImuKvJmqahAHs6rgv+aAg+l6kSoJvNlI4KgWSzJMwfjiY/dc+0VwTcPhB3BAoz3YbEOaIsqpymJMotlltGR++qMkHYm0FW1SWGylg5hAFTkpjWPSw2QFJCtyeVU7DzqQ5+XzEzLHSIQJksTeHnPaYzfSfSkDE0WKvhdsTR6wIosFLT5vA+GcGx2kZTqhQlIm9ArUhRb0wGq4q6LfYpf77dP4FMoupeLYlAwZhDBYVgj9YPr2mR9SnYWpNcd4n7CfNqSAwej5auRiQvbo2/KvPA9UE6O31cL7ulutPfGZnqA4/3v9wFXQK0nMUtjrVlaBGi9/h5hZXcZjW3s1iDo/Q00uFhPV0Ft2usnfb/tA8A/Qy90WGvJnPkBONxua2ec007X9RiBuMZZkl20=
+          vps.puttehi.eu ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLh2dYMrb5AF5pycm+bjsV1fWmT27Ul6QIcGOxaJnVlBOK/h3sDK4CpG9ckTuPVgHoqedBm6ESDxO+Xv+kXjHtg=
+          vps.puttehi.eu ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMFBb3LxsliKezj91JFQDHHZkxvNpZLCd1+tOQkKXr8k
+          EOT
       - name: Deploy stack
         run: |
           cd ${{ env.ANSIBLE_PROJECT_DIR }}
