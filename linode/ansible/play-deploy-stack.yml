@@ -72,7 +72,7 @@
 
     - name: "Podman: Download htmx-go-portfolio site configs"
       ansible.builtin.get_url:
-        src: "https://raw.githubusercontent.com/puttehi/htmx-go-portfolio/53073c22d61f2fdcab9029744d755c7bcfc6c9d4/configs/{{ item }}"
+        url: "https://raw.githubusercontent.com/puttehi/htmx-go-portfolio/53073c22d61f2fdcab9029744d755c7bcfc6c9d4/configs/{{ item }}"
         dest: "/home/puttehi/htmx-go-portfolio/configs/{{ item }}"
         owner: puttehi
         group: puttehi
