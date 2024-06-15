@@ -6,9 +6,9 @@
   block:
     - name: "Deploy container: Login to registry"
       containers.podman.podman_login:
-        username: "{{ outer_item.login_user }}"
-        password: "{{ outer_item.login_password }}"
-        registry: "{{ outer_item.login_registry }}"
+        username: "{{ outer_item.login_config.login_user }}"
+        password: "{{ outer_item.login_config.login_password }}"
+        registry: "{{ outer_item.login_config.login_registry }}"
       when:
         - outer_item.login_config is defined
     - name: "Deploy container: Pull container image"
