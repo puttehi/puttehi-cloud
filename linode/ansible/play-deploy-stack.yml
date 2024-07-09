@@ -61,27 +61,6 @@
             volumes:
               - "/root/config:/config"
 
-    - name: "Podman: Ensure htmx-go-portfolio/configs destination exists"
-      ansible.builtin.file:
-        path: /home/puttehi/htmx-go-portfolio/configs
-        state: directory
-        recurse: true
-        mode: "0755"
-        owner: puttehi
-        group: puttehi
-
-    - name: "Podman: Download htmx-go-portfolio site configs"
-      ansible.builtin.get_url:
-        url: "https://raw.githubusercontent.com/puttehi/htmx-go-portfolio/53073c22d61f2fdcab9029744d755c7bcfc6c9d4/configs/{{ item }}"
-        dest: "/home/puttehi/htmx-go-portfolio/configs/{{ item }}"
-        owner: puttehi
-        group: puttehi
-        mode: "0644"
-      with_items:
-        - project-items.json
-        - site-config.json
-        - work-experience-items.json
-
     - name: "Podman: puttehi / httpd, hello-world, htmx-go-portfolio"
       include_role:
         name: "deployment/podman"
@@ -107,7 +86,7 @@
             log_opt:
               max_size: "10mb"
           - name: "htmx-go-portfolio"
-            image: "ghcr.io/puttehi/htmx-go-portfolio:53073c22d61f2fdcab9029744d755c7bcfc6c9d4"
+            image: "ghcr.io/puttehi/htmx-go-portfolio:94f56eeae10e6d47bb35b2d4df28701d53c0959f"
             login_config:
               # Remember to allow repository in GitHub Packages to be able to login and pull
               login_registry: ghcr.io
