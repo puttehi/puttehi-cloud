@@ -92,9 +92,6 @@
               login_registry: ghcr.io
               login_user: "{{ lookup('ansible.builtin.env', 'PODMAN_USER') }}" # github.actor
               login_password: "{{ lookup('ansible.builtin.env', 'PODMAN_PASSWORD') }}" # github.token
-            volume:
-              # Site content
-              - "/home/puttehi/htmx-go-portfolio/configs:/configs"
             state: started
             ports:
               - "127.0.0.1:9000:3000/tcp"
