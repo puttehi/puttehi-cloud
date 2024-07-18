@@ -86,7 +86,7 @@
             log_opt:
               max_size: "10mb"
           - name: "htmx-go-portfolio"
-            image: "ghcr.io/puttehi/htmx-go-portfolio:94f56eeae10e6d47bb35b2d4df28701d53c0959f"
+            image: "ghcr.io/puttehi/htmx-go-portfolio:13df688b61dc936a5bd4e1c19a3ef0e5a93c04db"
             login_config:
               # Remember to allow repository in GitHub Packages to be able to login and pull
               login_registry: ghcr.io
