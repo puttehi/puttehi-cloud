@@ -34,7 +34,7 @@
               proxy_set_header Connection "Upgrade";
               proxy_set_header Host $host;
               client_max_body_size 0;
-        # www.puttehi.eu/* (Public)
+        # www.puttehi.eu/* (Open to public)
         nginx_reverse_proxy_public:
           "/":
             dest: "http://localhost:9000" # Website
