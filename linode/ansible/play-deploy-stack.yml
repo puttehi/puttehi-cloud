@@ -19,13 +19,17 @@
         force: true # Change if contents changes even if file already exists
       vars:
         nginx_domain: "vps.puttehi.eu"
+        # vps.puttehi.eu/* (Vouch layer)
         nginx_reverse_proxy:
           "/": "http://localhost:8080"
           "/hello": "http://localhost:8081"
           "~ ^/v1/database": "http://localhost:9001" # SpacetimeDB
+        # www.puttehi.eu/* (Open to public)
         nginx_reverse_proxy_public:
           "/": "http://localhost:9000" # Website
-          "~ ^/v1/database/[^/]+/(subscribe|call/[^/]+|schema)$": "http://localhost:9001" # SpacetimeDB public endpoints
+          # SpacetimeDB public endpoints
+          "~ ^/v1/database/[^/]+/(subscribe|call/[^/]+|schema)$": "http://localhost:9001"
+          "/v1/ping": "http://localhost:9001"
         nginx_cert_path: "/etc/letsencrypt/live"
       notify: "Nginx handler: Reload configuration"
 
