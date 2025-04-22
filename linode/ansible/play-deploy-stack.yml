@@ -22,7 +22,7 @@
         nginx_reverse_proxy:
           "/": "http://localhost:8080"
           "/hello": "http://localhost:8081"
-          "~ ^/v1/database": "http://localhost:8082" # SpacetimeDB
+          "~ ^/v1/database": "http://localhost:9001" # SpacetimeDB
         nginx_reverse_proxy_public:
           "/": "http://localhost:9000" # Website
           "~ ^/v1/database/[^/]+/(subscribe|call/[^/]+|schema)$": "http://localhost:9001" # SpacetimeDB public endpoints
@@ -93,15 +93,14 @@
             image: "docker.io/clockworklabs/spacetime:v1.1.0"
             command: "start --listen-addr='127.0.0.1:3000'"
             ports:
-              - "127.0.0.1:8082:3000" # Admin traffic
               - "127.0.0.1:9001:3000" # Public traffic
             volume:
               # Assumes directories exist.
               #- "...:/app"
               #- "...:/opt/spacetime"
               #- "...:/usr/bin/spacetime"
-              - "/home/puttehi/stdb/home/spacetime/.local/share/spacetime:/home/spacetime/.local/share/spacetime"
-              - "/home/puttehi/stdb/home/spacetime/.config/spacetime:/home/spacetime/.config/spacetime"
+              - "/home/puttehi/stdb/home/spacetime/.local/share/spacetime:/root/.local/share/spacetime"
+              - "/home/puttehi/stdb/home/spacetime/.config/spacetime:/root/.config/spacetime"
             detach: true
             tty: true
             log_opt:
