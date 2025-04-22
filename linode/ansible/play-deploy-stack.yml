@@ -91,7 +91,7 @@
             user: "root" # TODO: Update podman and :U the mounts so the default user works (STDB silently hangs on no permissions)
             state: started
             image: "docker.io/clockworklabs/spacetime:v1.1.0"
-            command: "start --listen-addr='127.0.0.1:3000'"
+            command: "start" # --listen-addr='0.0.0.0:3000' is default, help text wrongly states 80 and 127.0.0.1:3000 does not work in 1.1.0, or Podman, or Docker, so it has been omitted (not necessary for container anyways)
             ports:
               - "127.0.0.1:9001:3000" # Public traffic
             volume:
