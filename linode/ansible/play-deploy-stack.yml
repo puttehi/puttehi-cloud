@@ -89,7 +89,7 @@
               max_size: "10mb"
           - name: "spacetimedb"
             user: "stdb"
-            image: "clockworklabs/spacetime:latest"
+            image: "docker.io/clockworklabs/spacetime:v1.1.0"
             command: "start --listen-addr='127.0.0.1:3000'"
             ports:
               - "127.0.0.1:8082:3000" # Admin traffic
