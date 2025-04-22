@@ -100,8 +100,8 @@
               #- "...:/app"
               #- "...:/opt/spacetime"
               #- "...:/usr/bin/spacetime"
-              - "/home/puttehi/stdb/home/spacetime/.local/share/spacetime:/home/spacetime/.local/share/spacetime"
-              - "/home/puttehi/stdb/home/spacetime/.config/spacetime:/home/spacetime/.config/spacetime"
+              - "/home/puttehi/stdb/home/spacetime/.local/share/spacetime:/root/.local/share/spacetime"
+              - "/home/puttehi/stdb/home/spacetime/.config/spacetime:/root/.config/spacetime"
             detach: true
             tty: true
             log_opt:
