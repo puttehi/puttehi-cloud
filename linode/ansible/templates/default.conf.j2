@@ -7,27 +7,30 @@ ssl_certificate_key {{ nginx_cert_path }}/puttehi.eu/privkey.pem;
 # *. / puttehi.eu (CNAME should exist for wildcard)
 # HTTPS redirect
 server {
-	server_name *.puttehi.eu puttehi.eu;
-	listen 80;
+    server_name *.puttehi.eu puttehi.eu;
+    listen 80;
     # Access log per host
-	access_log /var/log/nginx/$host-access.log;
+    access_log /var/log/nginx/$host-access.log;
 
-	# Redirect to HTTPS
+    # Redirect to HTTPS
     return 302 https://$host$request_uri;
 }
 
 # Actual server behind HTTPS (needs wildcard cert)
 server {
-	server_name *.puttehi.eu puttehi.eu;
-	listen 443 ssl http2;
+    server_name *.puttehi.eu puttehi.eu;
+    listen 443 ssl http2;
     # Access log per host
-	access_log /var/log/nginx/$host-access.log;
+    access_log /var/log/nginx/$host-access.log;
 
     #!!!!!!!!!!!!# UNPROTECTED paths #!!!!!!!!!!!!#
 
-    {% for loc, proxy_dest in nginx_reverse_proxy_public.items() %}
+    {% for loc, settings in nginx_reverse_proxy_public.items() %}
     location {{ loc }} {
-    	proxy_pass {{ proxy_dest }};
+        proxy_pass {{ settings.dest }};
+        {% if settings.config is defined %}
+    {{ settings.config | indent(8, true) }}
+        {% endif %}
     }
     {% endfor %}
 }
@@ -42,78 +45,80 @@ upstream vouch.puttehi.eu {
 }
 
 server {
-	server_name vouch.puttehi.eu;
-	listen 80;
-	access_log /var/log/nginx/$host-access.log;
-	return 302 https://$host$request_uri;
-}
-
-server {
-	server_name vouch.puttehi.eu;
-	listen 443 ssl http2;
-	access_log /var/log/nginx/$host-access.log;
-
-	location / {
-		proxy_pass http://vouch.puttehi.eu;
-	}
-}
-
-# Actual subdomain
-server {
-	server_name {{ nginx_domain }};
-	listen 80;
-    # Access log per host
-	access_log /var/log/nginx/$host-access.log;
-
-	# Redirect to HTTPS
+    server_name vouch.puttehi.eu;
+    listen 80;
+    access_log /var/log/nginx/$host-access.log;
     return 302 https://$host$request_uri;
 }
 
 server {
-	server_name {{ nginx_domain }};
-	listen 443 ssl http2;
+    server_name vouch.puttehi.eu;
+    listen 443 ssl http2;
+    access_log /var/log/nginx/$host-access.log;
+
+    location / {
+        proxy_pass http://vouch.puttehi.eu;
+    }
+}
+
+# Actual subdomain
+server {
+    server_name {{ nginx_domain }};
+    listen 80;
     # Access log per host
-	access_log /var/log/nginx/$host-access.log;
+    access_log /var/log/nginx/$host-access.log;
+
+    # Redirect to HTTPS
+    return 302 https://$host$request_uri;
+}
+
+server {
+    server_name {{ nginx_domain }};
+    listen 443 ssl http2;
+    # Access log per host
+    access_log /var/log/nginx/$host-access.log;
 
     # Ensure auth from Vouch path
-	auth_request /validate;
+    auth_request /validate;
     # If (possibly previously undone) validation returned 401 unauthorized,
     # forward to unauthorized location (login)
-	error_page 401 = @error401;
+    error_page 401 = @error401;
 
     #!!!!!!!!!!!!# UNPROTECTED paths #!!!!!!!!!!!!#
 
     # Vouch validation path
-	location = /validate {
-		proxy_pass http://vouch.puttehi.eu;
+    location = /validate {
+        proxy_pass http://vouch.puttehi.eu;
 
-		# vouch only acts on the request headers
-		proxy_pass_request_body off;
-		proxy_set_header Content-Length "";
+        # vouch only acts on the request headers
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
 
-		# pass X-Vouch-User along with the request
-		auth_request_set $auth_resp_x_vouch_user $upstream_http_x_vouch_user;
+        # pass X-Vouch-User along with the request
+        auth_request_set $auth_resp_x_vouch_user $upstream_http_x_vouch_user;
 
-		# these return values are used by the authorization location @error401
-		auth_request_set $auth_resp_jwt $upstream_http_x_vouch_jwt;
-		auth_request_set $auth_resp_err $upstream_http_x_vouch_err;
-		auth_request_set $auth_resp_failcount $upstream_http_x_vouch_failcount;
-	}
+        # these return values are used by the authorization location @error401
+        auth_request_set $auth_resp_jwt $upstream_http_x_vouch_jwt;
+        auth_request_set $auth_resp_err $upstream_http_x_vouch_err;
+        auth_request_set $auth_resp_failcount $upstream_http_x_vouch_failcount;
+    }
 
     # Login page from failed auth_request
-	location @error401 {
-		# redirect to vouch for login
-		return 302 https://vouch.puttehi.eu/login?url=$scheme://$http_host$request_uri&vouch-failcount=$auth_resp_failcount&X-Vouch-Token=$auth_resp_jwt&error=$auth_resp_err;
-	}
+    location @error401 {
+        # redirect to vouch for login
+        return 302 https://vouch.puttehi.eu/login?url=$scheme://$http_host$request_uri&vouch-failcount=$auth_resp_failcount&X-Vouch-Token=$auth_resp_jwt&error=$auth_resp_err;
+    }
 
     # Was not forwarded to @error401 == Authorized user, forward to protected content after this line
 
     ############## Protected paths ##############
 
-    {% for loc, proxy_dest in nginx_reverse_proxy.items() %}
+    {% for loc, settings in nginx_reverse_proxy.items() %}
     location {{ loc }} {
-    	proxy_pass {{ proxy_dest }};
+        proxy_pass {{ settings.dest }};
+        {% if settings.config is defined %}
+    {{ settings.config | indent(8, true) }}
+        {% endif %}
     }
     {% endfor %}
-}
 
