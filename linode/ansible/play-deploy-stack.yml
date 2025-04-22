@@ -95,7 +95,12 @@
               - "127.0.0.1:8082:3000" # Admin traffic
               - "127.0.0.1:9001:3000" # Public traffic
             volume:
-              - "/home/puttehi/stdb:/" # Assumes directory exists. TODO: Optimize to only required mount, not full container
+              # Assumes directories exist.
+              #- "...:/app"
+              #- "...:/opt/spacetime"
+              #- "...:/usr/bin/spacetime"
+              - "/home/puttehi/stdb/.local/share/spacetime:/home/spacetime/.local/share/spacetime"
+              - "/home/puttehi/stdb/.config/spacetime:/home/spacetime/.config/spacetime"
             detach: true
             tty: true
             log_opt:
