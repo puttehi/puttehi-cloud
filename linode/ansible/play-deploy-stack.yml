@@ -88,6 +88,7 @@
             log_opt:
               max_size: "10mb"
           - name: "spacetimedb"
+            user: "root" # TODO: Update podman and :U the mounts so the default user works (STDB silently hangs on no permissions)
             state: started
             image: "docker.io/clockworklabs/spacetime:v1.1.0"
             command: "start --listen-addr='127.0.0.1:3000'"
