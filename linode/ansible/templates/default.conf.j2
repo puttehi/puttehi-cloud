@@ -25,14 +25,14 @@ server {
 
     #!!!!!!!!!!!!# UNPROTECTED paths #!!!!!!!!!!!!#
 
-    {% for loc, settings in nginx_reverse_proxy_public.items() %}
+    {%- for loc, settings in nginx_reverse_proxy_public.items() -%}
     location {{ loc }} {
         proxy_pass {{ settings.dest }};
-        {% if settings.config is defined %}
-    {{ settings.config | indent(8, true) }}
-        {% endif %}
+        {%- if settings.config is defined -%}
+        {{ settings.config | indent(8, true) }}
+        {%- endif -%}
     }
-    {% endfor %}
+    {%- endfor -%}
 }
 
 # Private subdomain ({{ nginx_domain }})
@@ -113,12 +113,12 @@ server {
 
     ############## Protected paths ##############
 
-    {% for loc, settings in nginx_reverse_proxy.items() %}
+    {%- for loc, settings in nginx_reverse_proxy.items() -%}
     location {{ loc }} {
         proxy_pass {{ settings.dest }};
-        {% if settings.config is defined %}
-    {{ settings.config | indent(8, true) }}
-        {% endif %}
+        {%- if settings.config is defined -%}
+        {{ settings.config | indent(8, true) }}
+        {%- endif -%}
     }
-    {% endfor %}
-
+    {%- endfor -%}
+}
