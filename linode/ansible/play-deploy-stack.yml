@@ -99,8 +99,8 @@
               #- "...:/app"
               #- "...:/opt/spacetime"
               #- "...:/usr/bin/spacetime"
-              - "/home/puttehi/stdb/home/spacetime/.local/share/spacetime:/home/spacetime/.local/share/spacetime:U" # Data. Chowned.
-              - "/home/puttehi/stdb/home/spacetime/.config/spacetime:/home/spacetime/.config/spacetime:U" # Keys + config. Chowned.
+              - "/home/puttehi/stdb/home/spacetime/.local/share/spacetime:/home/spacetime/.local/share/spacetime"
+              - "/home/puttehi/stdb/home/spacetime/.config/spacetime:/home/spacetime/.config/spacetime"
             detach: true
             tty: true
             log_opt:
