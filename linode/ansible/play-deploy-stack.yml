@@ -21,15 +21,34 @@
         nginx_domain: "vps.puttehi.eu"
         # vps.puttehi.eu/* (Vouch layer)
         nginx_reverse_proxy:
-          "/": "http://localhost:8080"
-          "/hello": "http://localhost:8081"
-          "~ ^/v1/database": "http://localhost:9001" # SpacetimeDB
+          "/":
+            dest: "http://localhost:8080"
+          "/hello":
+            dest: "http://localhost:8081"
+          "~ ^/v1/database":
+            dest: "http://localhost:9001" # SpacetimeDB
+            # Websocket support + STDB recommendations + publish requires nginx body size hack
+            config: |
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "Upgrade";
+              proxy_set_header Host $host;
+              client_max_body_size 0;
         # www.puttehi.eu/* (Open to public)
         nginx_reverse_proxy_public:
-          "/": "http://localhost:9000" # Website
+          "/":
+            dest: "http://localhost:9000" # Website
           # SpacetimeDB public endpoints
-          "~ ^/v1/database/[^/]+/(subscribe|call/[^/]+|schema)$": "http://localhost:9001"
-          "/v1/ping": "http://localhost:9001"
+          "~ ^/v1/database/[^/]+/(subscribe|call/[^/]+|schema)$":
+            dest: "http://localhost:9001"
+            # Websocket support + STDB recommendations
+            config: |
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "Upgrade";
+              proxy_set_header Host $host;
+          "/v1/ping":
+            dest: "http://localhost:9001" # Just HTTP, no need for config
         nginx_cert_path: "/etc/letsencrypt/live"
       notify: "Nginx handler: Reload configuration"
 
