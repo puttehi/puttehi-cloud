@@ -48,6 +48,14 @@
               proxy_set_header Host $host;
           "/v1/ping":
             dest: "http://localhost:9001" # Just HTTP, no need for config
+          "/phaserclient":
+            dest: "http://localhost:9002" # spacetime-phaser-client
+            # Just in case?
+            config: |
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "Upgrade";
+              proxy_set_header Host $host;
         nginx_cert_path: "/etc/letsencrypt/live"
       notify: "Nginx handler: Reload configuration"
 
@@ -109,6 +117,20 @@
             tty: true
             log_opt:
               max_size: "10mb"
+          - name: "htmx-go-portfolio"
+            image: "ghcr.io/puttehi/htmx-go-portfolio:2cf74ce6328b818956dc99c0001997ec93a22077"
+            login_config:
+              # Remember to allow repository in GitHub Packages to be able to login and pull
+              login_registry: ghcr.io
+              login_user: "{{ lookup('ansible.builtin.env', 'PODMAN_USER') }}" # github.actor
+              login_password: "{{ lookup('ansible.builtin.env', 'PODMAN_PASSWORD') }}" # github.token
+            state: started
+            ports:
+              - "127.0.0.1:9000:3000/tcp"
+            detach: true
+            tty: true
+            log_opt:
+              max_size: "100mb"
           - name: "spacetimedb"
             user: "root" # TODO: Update podman and :U the mounts so the default user works (STDB silently hangs on no permissions)
             state: started
@@ -127,8 +149,8 @@
             tty: true
             log_opt:
               max_size: "100mb"
-          - name: "htmx-go-portfolio"
-            image: "ghcr.io/puttehi/htmx-go-portfolio:2cf74ce6328b818956dc99c0001997ec93a22077"
+          - name: "spacetime-phaser-client"
+            image: "ghcr.io/puttehi/spacetime-phaser-client:83656c6cfe2e6d307204820abd547fe00a677b22"
             login_config:
               # Remember to allow repository in GitHub Packages to be able to login and pull
               login_registry: ghcr.io
@@ -136,7 +158,7 @@
               login_password: "{{ lookup('ansible.builtin.env', 'PODMAN_PASSWORD') }}" # github.token
             state: started
             ports:
-              - "127.0.0.1:9000:3000/tcp"
+              - "127.0.0.1:9002:80/tcp"
             detach: true
             tty: true
             log_opt:
