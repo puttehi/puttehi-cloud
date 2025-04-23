@@ -23,11 +23,17 @@ server {
     # Access log per host
     access_log /var/log/nginx/$host-access.log;
 
+    # TODO: For stdb. Mostly for its 'spacetime publish' uploads
+    client_max_body_size 100m;
+
     #!!!!!!!!!!!!# UNPROTECTED paths #!!!!!!!!!!!!#
 
 {% for loc, settings in nginx_reverse_proxy_public.items() %}
     location {{ loc }} {
         proxy_pass {{ settings.dest }};
+        # CORS
+        proxy_hide_header Access-Control-Allow-Origin;
+        add_header Access-Control-Allow-Origin http://vps.puttehi.eu;
 {% if settings.config is defined %}
 {{ settings.config | indent(8, true) }}
 {% endif %}
@@ -84,6 +90,9 @@ server {
     # forward to unauthorized location (login)
     error_page 401 = @error401;
 
+    # TODO: For stdb. Mostly for its 'spacetime publish' uploads
+    client_max_body_size 100m;
+
     #!!!!!!!!!!!!# UNPROTECTED paths #!!!!!!!!!!!!#
 
     # Vouch validation path
@@ -101,7 +110,13 @@ server {
         auth_request_set $auth_resp_jwt $upstream_http_x_vouch_jwt;
         auth_request_set $auth_resp_err $upstream_http_x_vouch_err;
         auth_request_set $auth_resp_failcount $upstream_http_x_vouch_failcount;
-    }
+
+        # CORS
+        proxy_hide_header Access-Control-Allow-Origin;
+        add_header Access-Control-Allow-Origin http://vps.puttehi.eu;
+        proxy_hide_header Access-Control-Allow-Credentials;
+        add_header Access-Control-Allow-Credentials true;
+}
 
     # Login page from failed auth_request
     location @error401 {
@@ -116,6 +131,12 @@ server {
 {% for loc, settings in nginx_reverse_proxy.items() %}
     location {{ loc }} {
         proxy_pass {{ settings.dest }};
+
+        # CORS
+        proxy_hide_header Access-Control-Allow-Origin;
+        add_header Access-Control-Allow-Origin http://vps.puttehi.eu;
+        proxy_hide_header Access-Control-Allow-Credentials;
+        add_header Access-Control-Allow-Credentials true;
 {% if settings.config is defined %}
 {{ settings.config | indent(8, true) }}
 {% endif %}
