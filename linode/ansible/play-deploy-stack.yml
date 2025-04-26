@@ -150,7 +150,7 @@
             log_opt:
               max_size: "100mb"
           - name: "spacetime-phaser-client"
-            image: "ghcr.io/puttehi/spacetime-phaser-client:4b8e0aa7ce61ac6c03ca0fb26bd69d43a3439fea"
+            image: "ghcr.io/puttehi/spacetime-phaser-client:d8008381b084141315c768f75cfc48b3fec68dad"
             login_config:
               # Remember to allow repository in GitHub Packages to be able to login and pull
               login_registry: ghcr.io
