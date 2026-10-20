@@ -7,6 +7,7 @@ on:
     paths:
       - "linode/ansible/play-deploy-stack.yml"
       - ".github/workflows/deploy-stack.yml"
+  workflow_dispatch:
 jobs:
   run-playbook:
     name: "Run Ansible Playbook"
